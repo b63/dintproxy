@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
     const std::regex rgx("--(.+):(.+)");
     int lport = 8001;
-    std::string lname ("0.0.0.0");
+    std::string lname ("127.0.0.1");
 
     std::cmatch cm;
     for (int i = 1; i < argc; ++i)

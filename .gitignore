@@ -1,3 +1,5 @@
 build/
 .cache/
+bin/
+lib/lib*.a
 

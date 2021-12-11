@@ -20,7 +20,6 @@
 #include <error.h>
 
 #include <dint/dint_public.h>
-#include <dint/exceptions.h>
 
 #include "proxyclient.h"
 #include "util.h"
@@ -140,7 +139,7 @@ void Client::listen()
 
     while (!stop)
     {
-        LOGFC(tcolors::GREEN, "proxy client listening on: %s %i\n", str_addr, port);
+        LOGFC(tcolors::GREEN, "proxy client listening on %s:%i\n", str_addr, port);
         m_sockfd = net_accept(m_listenfd, (sockaddr*) &cl_addr, &cl_addr_size);
 
         // handle socket in a forked child process
@@ -164,7 +163,7 @@ void Client::listen()
                 throw dint::Exception(strerror(errno));
             }
 
-            LOGF("child process: handling %s %i\n", str_addr, port);
+            LOGF("child process handling %s:%i\n", str_addr, port);
             stop = true;
             proxy_connection();
         }
@@ -180,7 +179,7 @@ void Client::listen()
                 m_childp->push_back(child);
             }
 
-            LOGF("parent: forked, current size %lu\n", m_childp->size());
+            LOGF("parent forked, current size %lu\n", m_childp->size());
 
             if (m_sigthread == nullptr) {
                 m_sigthread = std::make_shared<std::thread>([&](){child_sighandler();});

@@ -16,12 +16,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
-add_compile_options(-ggdb -O0)
+add_compile_options(-ggdb)
 
 include_directories(BEFORE ${CMAKE_SOURCE_DIR}/)
 include_directories(BEFORE ${CMAKE_SOURCE_DIR}/include)
-
 include_directories(BEFORE ${CMAKE_SOURCE_DIR}/lib/)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/logger/)
 
 find_library(CRYPTOPP
     NAMES libcryptopp.a
@@ -30,5 +30,7 @@ find_library(CRYPTOPP
 find_library(DINT
     NAMES libdint.a
     HINTS ${CMAKE_SOURCE_DIR}/lib/)
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/logger)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)

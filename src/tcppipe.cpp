@@ -9,6 +9,7 @@
 #include <cstring>
 #include <functional>
 #include <thread>
+#include <mutex>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -20,10 +21,9 @@
 #include <fcntl.h>
 
 #include <dint/dint_public.h>
-#include <dint/exceptions.h>
+#include <logger.h>
 #include "tcppipe.h"
 #include "util.h"
-#include "logger.h"
 
 constexpr auto net_connect = connect;
 
@@ -54,12 +54,14 @@ TCPPipe::TCPPipe(int sockfd)
     int flags = fcntl(m_sockfd, F_GETFL, 0);
     fcntl(m_sockfd, F_SETFL, flags | O_NONBLOCK);
 
-    LOGF("using existing socket: %s %i\n", name, m_port);
+    LOGF("using existing socket %s:%i\n", name, m_port);
 }
 
 
 TCPPipe::~TCPPipe() 
 {
+    if (m_sockfd)
+        shutdown(m_sockfd, 2);
 }
 
 
@@ -94,7 +96,9 @@ void TCPPipe::connect()
         throw dint::Exception(strerror(errno));
     }
 
-    LOGF("connecting to %s on port %i\n", str_addr, port);
+    LOGF("connecting to %s:%i\n", str_addr, port);
+    m_name = str_addr;
+    m_port = port;
 
     int err = net_connect(m_sockfd, m_addrinfo->ai_addr, m_addrinfo->ai_addrlen);
     if (err) {
@@ -133,12 +137,14 @@ void TCPPipe::reader(const send_f &send)
         // resize buffer to fit bytes that were read in
         if (read > 0) {
             buf->resize(read);
-            LOGF("reader read, sending\n");
+            LOGF("reader read from %s:%i, sending\n", m_name.c_str(), m_port);
             LOGBUF(*buf);
 
             send(buf);
         }
     }
+    if (m_poll_sig)
+        LOGERR("reader thread: stopped polling\n");
 }
 
 
@@ -154,26 +160,29 @@ void TCPPipe::writer(const recv_f &recv)
         len = buf->size();
 
         if (len > 0) {
-            LOGF("writer read, sending:\n");
+            LOGF("writer read, sending to %s:%i\n", m_name.c_str(), m_port);
             LOGBUF(*buf);
         }
 
         while (sent < len) {
             err = send(m_sockfd, buf->data()+sent, len-sent, 0);
 
-            if (err < -1) {
+            if (err == -1) {
                 throw dint::Exception(strerror(errno));
             } else {
                 sent += err;
             }
         }
     }
+    if (m_poll_sig)
+        LOGERR("writer thread: stopped polling\n");
 }
 
 void TCPPipe::start_pipe(const recv_f &receive, const send_f &send,
         const std::function<void()> &rquit, const std::function<void()> &squit)
 {
     m_poll_sig = false;
+    std::mutex mtx;
     std::thread reader_thread ([&](){
             try{ reader(send); }
             catch(const std::exception &e) {
@@ -182,7 +191,11 @@ void TCPPipe::start_pipe(const recv_f &receive, const send_f &send,
             }
 
             try {
-                if (rquit) rquit();
+                if (rquit) {
+                // only one thread cleanup at one time
+                    std::lock_guard<std::mutex> l {mtx};
+                    rquit();
+                };
             } catch(const std::exception &e) {
                 LOGERR("reader thread error quitting: %s\n", e.what());
             }
@@ -197,7 +210,11 @@ void TCPPipe::start_pipe(const recv_f &receive, const send_f &send,
             }
 
             try {
-                if (squit) squit();
+                if (squit) {
+                // only one thread cleanup at one time
+                    std::lock_guard<std::mutex> l {mtx};
+                    squit();
+                }
             } catch(const std::exception &e) {
                 LOGERR("writer thread error quitting: %s\n", e.what());
             }

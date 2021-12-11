@@ -20,7 +20,6 @@
 #include <error.h>
 
 #include <dint/dint_public.h>
-#include <dint/exceptions.h>
 
 #include "proxyserver.h"
 #include "util.h"
@@ -131,7 +130,7 @@ void Server::listen()
     bool stop = false;
     while (!stop)
     {
-        LOGFC(tcolors::GREEN, "proxy server: listening on %s:%i ..\n", str_addr, port);
+        LOGFC(tcolors::GREEN, "proxy server listening on %s:%i ..\n", str_addr, port);
         m_sockfd = net_accept(m_listenfd, (sockaddr*) &cl_addr, &cl_addr_size);
 
         // handle socket in a forked child process
@@ -156,7 +155,7 @@ void Server::listen()
                 throw dint::Exception(strerror(errno));
             }
 
-            LOGF(tcolors::GREEN, "child process handling %s %i\n", str_addr, port);
+            LOGF("child process handling %s:%i\n", str_addr, port);
             stop = true;
             proxy_connection();
         }

@@ -19,8 +19,8 @@ int main(int argc, char **argv)
 
     const std::regex rgx("--(.+):(.+)");
     int lport = 5001, rport = 8001;
-    std::string lname ("0.0.0.0");
-    std::string rname ("0.0.0.0");
+    std::string lname ("127.0.0.1");
+    std::string rname ("127.0.0.1");
 
     std::cmatch cm;
     for (int i = 1; i < argc; ++i)
@@ -51,6 +51,9 @@ int main(int argc, char **argv)
         }
     }
 
+    // "termiante called without an active exception"
+    //  when c's destructor is called after the first time
+    //  TODO: ^ solve this mystery
     Client c(lname, lport, rname, rport);
     c.listen();
 

@@ -12,8 +12,8 @@
 #include <error.h>
 
 
+#include <dint/dint_public.h>
 #include "util.h"
-#include "dint/exceptions.h"
 
 int sock_addrport(addrinfo *addr, char *str, size_t len, int *port)
 {
