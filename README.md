@@ -9,7 +9,7 @@ mostly include
   - [dint](https://github.com/b63/dint)
 
 The quick-and-dirty way to get Crypto++ and dint is to first
-clone and build dint locally. Then add the following symoblic link
+clone and build dint locally. Then add the following symoblic links
 to the root directory of this project. Assuming dint was cloned in
 the same parent directory,
 ```bash
