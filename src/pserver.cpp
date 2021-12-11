@@ -9,12 +9,16 @@
 
 void print_help()
 {
-    printf("pserver [--name=<local name>] [--port=<local port>]\n");
+    printf("proxy-server [--name=<local name>] [--port=<local port>]\n");
 }
 
 int main(int argc, char **argv)
 {
-    start_logger(stdout);
+    if (argc > 1 && !strcmp(argv[1], "--help"))
+    {
+        print_help();
+        exit(0);
+    }
 
     const std::regex rgx("--(.+):(.+)");
     int lport = 8001;
@@ -38,13 +42,14 @@ int main(int argc, char **argv)
             lname = val;
         } else if (opt == "lport") {
             lport = atoi(val.c_str());
-        } else {
+       } else {
             fprintf(stderr, "unkown option: '%s'\n", argv[i]);
             print_help();
             exit(1);
         }
     }
 
+    start_logger(stdout);
     Server s(lname, lport);
     s.listen();
 

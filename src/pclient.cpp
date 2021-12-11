@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <sstream>
+#include <cstring>
 #include <thread>
 #include <iostream>
 #include <regex>
@@ -9,13 +10,17 @@
 
 void print_help()
 {
-    printf("pclient [--lname=<local name>] [--lport=<local port>] \n\
-    [--sname=<server name>] [--sport=<server port>]\n");
+    printf("proxy-client [--lname=<local name>] [--lport=<local port>] \n\
+             [--sname=<server name>] [--sport=<server port>]\n");
 }
 
 int main(int argc, char **argv)
 {
-    start_logger(stdout);
+    if (argc > 1 && !strcmp(argv[1], "--help"))
+    {
+        print_help();
+        exit(0);
+    }
 
     const std::regex rgx("--(.+):(.+)");
     int lport = 5001, rport = 8001;
@@ -51,6 +56,7 @@ int main(int argc, char **argv)
         }
     }
 
+    start_logger(stdout);
     // "termiante called without an active exception"
     //  when c's destructor is called after the first time
     //  TODO: ^ solve this mystery
