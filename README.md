@@ -10,7 +10,7 @@ mostly include
 
 The quick-and-dirty way to get Crypto++ and dint is to first
 clone and build dint locally. Then add the following symoblic link
-to the root directory of this project assuming dint was cloned in
+to the root directory of this project. Assuming dint was cloned in
 the same parent directory,
 ```bash
 ln -s ../dint/include dint
@@ -20,7 +20,7 @@ ln -s ../dint/lib/cryptopp  lib/
 
 Then the project can be build by running,
 ```bash
-    cmake -Bbuild && cmake --build build
+cmake -Bbuild && cmake --build build
 ```
 
 After the build is finished, the proxy-server/proxy-client binaries 
