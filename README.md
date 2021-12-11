@@ -26,7 +26,7 @@ cmake -Bbuild && cmake --build build
 After the build is finished, the proxy-server/proxy-client binaries 
 will be found under `bin/`.
 
-Options for running `proxy-client` and `proxy-server` by passing `--help`.
+Options for running `proxy-client` and `proxy-server`.
 ```shell
 $ bin/proxy-client --help
 proxy-server [--lname=<local name>] [--lport=<local port>]
